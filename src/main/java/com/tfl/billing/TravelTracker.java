@@ -17,7 +17,7 @@ public class TravelTracker implements ScanListener {
         this.travelLogger = travelLogger;
     }
 
-    public void chargeAccounts() {
+    public void chargeAccounts(PaymentsSystem paymentsSystem) {
         CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
 
         List<Customer> customers = customerDatabase.getCustomers();
@@ -26,7 +26,7 @@ public class TravelTracker implements ScanListener {
             List<Journey> customerJourneys = travelLogger.getCustomerJourneys(customerJourneyEvents);
             BigDecimal customerTotal = travelLogger.getCustomerTotal(customerJourneys);
 
-            PaymentsSystem.getInstance().charge(customer, customerJourneys, roundToNearestPenny(customerTotal));
+            paymentsSystem.charge(customer, customerJourneys, customerTotal);
         }
     }
 
@@ -35,16 +35,14 @@ public class TravelTracker implements ScanListener {
         List<Journey> customerJourneys = travelLogger.getCustomerJourneys(customerJourneyEvents);
         BigDecimal customerTotal = travelLogger.getCustomerTotal(customerJourneys);
 
-        PaymentsSystem.getInstance().charge(customer, customerJourneys, roundToNearestPenny(customerTotal));
+        PaymentsSystem.getInstance().charge(customer, customerJourneys, customerTotal);
     }
 
 
 
 
 
-    private BigDecimal roundToNearestPenny(BigDecimal poundsAndPence) {
-        return poundsAndPence.setScale(2, BigDecimal.ROUND_HALF_UP);
-    }
+
 
     private boolean peak(Journey journey) {
         return peak(journey.startTime()) || peak(journey.endTime());

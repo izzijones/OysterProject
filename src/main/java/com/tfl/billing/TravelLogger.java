@@ -95,7 +95,11 @@ public class TravelLogger {
         else if (customerTotal.compareTo(PEAK_CAP) > 0){
             customerTotal = PEAK_CAP;
         }
-        return customerTotal;
+        return roundToNearestPenny(customerTotal);
+    }
+
+    public BigDecimal roundToNearestPenny(BigDecimal poundsAndPence) {
+        return poundsAndPence.setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     private boolean peak(Journey journey) {
