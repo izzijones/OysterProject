@@ -4,11 +4,13 @@ import com.oyster.OysterCard;
 import com.oyster.OysterCardReader;
 import com.tfl.billing.TravelTracker;
 import com.tfl.external.Customer;
+import com.tfl.external.CustomerDatabase;
 import com.tfl.external.PaymentsSystem;
 import com.tfl.underground.OysterReaderLocator;
 import com.tfl.underground.Station;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Expectation;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.Test;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -23,30 +25,41 @@ public class TravelTrackerTest {
     private static final BigDecimal PEAK_SHORT_JOURNEY_PRICE = new BigDecimal(2.90);
     static final BigDecimal PEAK_LONG_JOURNEY_PRICE = new BigDecimal(3.80);
 
-        private Mockery context = new Mockery() {{
+        private Mockery context = new JUnit4Mockery() {{
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
 
     private static final UUID cardId = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
     private static final UUID readerId = OysterReaderLocator.atStation(Station.PADDINGTON).id();
 
+//    CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
+    Customer fred = new Customer("Fred Bloggs", new OysterCard("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
+
     Long peakStart = 1512630000000L; //7 am
     Long peakEnd = 1512630600000L;//7:10 am
 
     PaymentsSystem paymentsSystem = context.mock(PaymentsSystem.class);
     OysterCardReader paddingtonReader = context.mock(OysterCardReader.class);
-    TravelTracker travelTracker = new TravelTracker();
+
     TravelLogger travelLogger = TravelLogger.getInstance();
-    Customer customer = new Customer("Fred Bloggs", new OysterCard());
+
+
+//    Customer customer = new Customer("Fred Bloggs", new OysterCard("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
 
 
     @Test
     public void chargeAccountsForPeakShort() throws Exception {
-        List<Journey> journeys = Arrays.asList(new Journey(new JourneyStart(cardId, readerId, peakStart),
-                                                new JourneyEnd(cardId, readerId, peakEnd)));
+        TravelTracker travelTracker = new TravelTracker(travelLogger);
+        travelLogger.beginJourney(cardId, readerId, peakStart);
+        travelLogger.endJourney(cardId,readerId, peakEnd);
+
+        List<Journey> journeys = travelLogger.getCustomerJourneys(travelLogger.getCustomerJourneyEvents(fred));
         context.checking(new Expectations(){{
-            exactly(1).of(paymentsSystem).charge(customer,journeys,PEAK_SHORT_JOURNEY_PRICE);
+            exactly(1).of(paymentsSystem).charge(fred,journeys,PEAK_SHORT_JOURNEY_PRICE);
         }});
+
+        travelTracker.chargeAccounts();
+        context.assertIsSatisfied();
     }
 
     @Test
@@ -76,13 +89,16 @@ public class TravelTrackerTest {
 
     @Test
     public void connect() throws Exception {
+        TravelTracker travelTracker = new TravelTracker(travelLogger);
 
-    context.checking(new Expectations(){{
-        exactly(1).of(paddingtonReader).register(travelTracker);
-    }});
+        context.checking(new Expectations(){{
+            exactly(1).of(paddingtonReader).register(travelTracker);
+        }});
 
-    travelTracker.connect(paddingtonReader);
+        travelTracker.connect(paddingtonReader);
+        context.assertIsSatisfied();
     }
+
 
     @Test
     public void cardScanned() throws Exception {

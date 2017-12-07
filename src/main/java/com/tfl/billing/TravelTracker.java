@@ -10,18 +10,12 @@ import java.util.*;
 
 public class TravelTracker implements ScanListener {
 
-    private static final BigDecimal OFF_PEAK_SHORT_JOURNEY_PRICE = new BigDecimal(1.60);
-    private static final BigDecimal OFF_PEAK_LONG_JOURNEY_PRICE = new BigDecimal(2.70);
-    private static final BigDecimal PEAK_SHORT_JOURNEY_PRICE = new BigDecimal(2.90);
-    static final BigDecimal PEAK_LONG_JOURNEY_PRICE = new BigDecimal(3.80);
 
-    static final BigDecimal OFF_PEAK_CAP = new BigDecimal(7.0);
-    static final BigDecimal PEAK_CAP = new BigDecimal(9.0);
+    private TravelLogger travelLogger;
 
-//    private final List<JourneyEvent> eventLog = new ArrayList<>();
-//    private final Set<UUID> currentlyTravelling = new HashSet<>();
-
-    private TravelLogger travelLogger = TravelLogger.getInstance();
+    public TravelTracker(TravelLogger travelLogger){
+        this.travelLogger = travelLogger;
+    }
 
     public void chargeAccounts() {
         CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
@@ -73,11 +67,11 @@ public class TravelTracker implements ScanListener {
     @Override
     public void cardScanned(UUID cardId, UUID readerId) {
         if (!travelLogger.isTraveling(cardId)) {
-            travelLogger.endJourney(cardId,readerId);
+            travelLogger.endJourney(cardId,readerId, System.currentTimeMillis());
             System.out.println("Journey ended for " + cardId.toString());
         } else {
             if (CustomerDatabase.getInstance().isRegisteredId(cardId)) {
-                travelLogger.beginJourney(cardId,readerId);
+                travelLogger.beginJourney(cardId,readerId, System.currentTimeMillis());
                 System.out.println("Journey started for "+ cardId.toString());
             } else {
                 throw new UnknownOysterCardException(cardId);

@@ -24,15 +24,15 @@ public class TravelLogger {
         return instance;
     }
 
-    public void beginJourney(UUID cardId, UUID readerId){
+    public void beginJourney(UUID cardId, UUID readerId, long time){
         currentlyTravelling.add(cardId);
-        eventLog.add(new JourneyStart(cardId,readerId, System.currentTimeMillis()) {
+        eventLog.add(new JourneyStart(cardId,readerId, time) {
         });
     }
 
-    public void endJourney(UUID cardId, UUID readerId){
+    public void endJourney(UUID cardId, UUID readerId, long time){
         currentlyTravelling.remove(cardId);
-        eventLog.add(new JourneyEnd(cardId,readerId, System.currentTimeMillis()));
+        eventLog.add(new JourneyEnd(cardId,readerId, time));
     }
 
     public boolean isTraveling(UUID cardId){
