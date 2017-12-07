@@ -13,8 +13,8 @@ public class JourneyTest {
     static final UUID  cardId = UUID.randomUUID();
     static final UUID readerId1 = UUID.randomUUID();
     static final UUID readerId2 = UUID.randomUUID();
-    JourneyEvent start = new JourneyStart(cardId,readerId1);
-    JourneyEvent end = new JourneyEnd(cardId,readerId2);
+    JourneyEvent start = new JourneyStart(cardId,readerId1, System.currentTimeMillis());
+    JourneyEvent end = new JourneyEnd(cardId,readerId2, System.currentTimeMillis()+10000000);
     Journey journey = new Journey(start,end);
 
     @Test
