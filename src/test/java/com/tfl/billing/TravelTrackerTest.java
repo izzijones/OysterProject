@@ -65,7 +65,8 @@ public class TravelTrackerTest {
 
         context.checking(new Expectations(){{
             atLeast(1).of(paymentsSystem).charge(customer,travelLogger.getCustomerJourneys(customerJourneyEvents),travelLogger.roundToNearestPenny(new BigDecimal(2.90)));
-            
+            ignoring(paymentsSystem).charge(with(any(Customer.class)), with(any(List.class)), with(any(BigDecimal.class)));
+
         }});
 
         travelTracker.chargeAccounts(paymentsSystem);
