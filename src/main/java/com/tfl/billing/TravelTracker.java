@@ -18,8 +18,8 @@ public class TravelTracker implements ScanListener {
     static final BigDecimal OFF_PEAK_CAP = new BigDecimal(7.0);
     static final BigDecimal PEAK_CAP = new BigDecimal(9.0);
 
-    private final List<JourneyEvent> eventLog = new ArrayList<JourneyEvent>();
-    private final Set<UUID> currentlyTravelling = new HashSet<UUID>();
+    private final List<JourneyEvent> eventLog = new ArrayList<>();
+    private final Set<UUID> currentlyTravelling = new HashSet<>();
 
     public void chargeAccounts() {
         CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
@@ -31,14 +31,25 @@ public class TravelTracker implements ScanListener {
     }
 
     private void totalJourneysFor(Customer customer) {
-        List<JourneyEvent> customerJourneyEvents = new ArrayList<JourneyEvent>();
+        List<JourneyEvent> customerJourneyEvents = getCustomerJourneyEvents(customer);
+        List<Journey> customerJourneys = getCustomerJourneys(customerJourneyEvents);
+        BigDecimal customerTotal = getCustomerTotal(customerJourneys);
+
+        PaymentsSystem.getInstance().charge(customer, customerJourneys, roundToNearestPenny(customerTotal));
+    }
+
+    private List<JourneyEvent> getCustomerJourneyEvents(Customer customer) {
+        List<JourneyEvent> customerJourneyEvents = new ArrayList<>();
         for (JourneyEvent journeyEvent : eventLog) {
             if (journeyEvent.cardId().equals(customer.cardId())) {
                 customerJourneyEvents.add(journeyEvent);
             }
         }
+        return customerJourneyEvents;
+    }
 
-        List<Journey> journeys = new ArrayList<Journey>();
+    private List<Journey> getCustomerJourneys(List<JourneyEvent> customerJourneyEvents) {
+        List<Journey> journeys = new ArrayList<>();
 
         JourneyEvent start = null;
         for (JourneyEvent event : customerJourneyEvents) {
@@ -50,38 +61,42 @@ public class TravelTracker implements ScanListener {
                 start = null;
             }
         }
+        return journeys;
+    }
 
-        int offPeakCount = 0;
-        int peakCount = 0;
+    private BigDecimal getCustomerTotal(List<Journey> journeys) {
         BigDecimal customerTotal = new BigDecimal(0);
+        int offPeakCount = 0;
+
         for (Journey journey : journeys) {
+
             BigDecimal journeyPrice;
-            if (peak(journey)&&isLong(journey)) {
+
+            if (peak(journey) && isLong(journey)) {
                 journeyPrice = PEAK_LONG_JOURNEY_PRICE;
-                peakCount++;
             }
-            else if(peak(journey)&& !isLong(journey)){
+            else if (peak(journey) && ! isLong(journey)){
                 journeyPrice = PEAK_SHORT_JOURNEY_PRICE;
-                peakCount++;
             }
-            else if(!peak(journey)&&isLong(journey)){
+            else if (! peak(journey) && isLong(journey)){
                 journeyPrice = OFF_PEAK_LONG_JOURNEY_PRICE;
                 offPeakCount++;
             }
-            else{
+            else {
                 journeyPrice = OFF_PEAK_SHORT_JOURNEY_PRICE;
                 offPeakCount++;
             }
+
             customerTotal = customerTotal.add(journeyPrice);
-            if(journeys.size()==offPeakCount && (customerTotal.compareTo(OFF_PEAK_CAP) > 0 )){
+
+            if (journeys.size() == offPeakCount && (customerTotal.compareTo(OFF_PEAK_CAP) > 0)){
                 customerTotal = OFF_PEAK_CAP;
             }
-            else if(customerTotal.compareTo(PEAK_CAP)>0){
+            else if (customerTotal.compareTo(PEAK_CAP) > 0){
                 customerTotal = PEAK_CAP;
             }
         }
-
-        PaymentsSystem.getInstance().charge(customer, journeys, roundToNearestPenny(customerTotal));
+        return customerTotal;
     }
 
     private BigDecimal roundToNearestPenny(BigDecimal poundsAndPence) {
@@ -100,8 +115,9 @@ public class TravelTracker implements ScanListener {
     }
 
     private boolean isLong(Journey journey){
-        return (journey.durationSeconds() > 25*60);
+        return (journey.durationSeconds() >= (25 * 60));
     }
+
 
     public void connect(OysterCardReader... cardReaders) {
         for (OysterCardReader cardReader : cardReaders) {
