@@ -22,7 +22,11 @@ public class TravelTracker implements ScanListener {
 
         List<Customer> customers = customerDatabase.getCustomers();
         for (Customer customer : customers) {
-            totalJourneysFor(customer);
+            List<JourneyEvent> customerJourneyEvents = travelLogger.getCustomerJourneyEvents(customer);
+            List<Journey> customerJourneys = travelLogger.getCustomerJourneys(customerJourneyEvents);
+            BigDecimal customerTotal = travelLogger.getCustomerTotal(customerJourneys);
+
+            PaymentsSystem.getInstance().charge(customer, customerJourneys, roundToNearestPenny(customerTotal));
         }
     }
 

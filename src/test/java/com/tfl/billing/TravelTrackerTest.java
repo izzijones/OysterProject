@@ -29,11 +29,11 @@ public class TravelTrackerTest {
             setImposteriser(ClassImposteriser.INSTANCE);
         }};
 
-    private static final UUID cardId = UUID.fromString("38400000-8cf0-11bd-b23e-10b96e4ef00d");
     private static final UUID readerId = OysterReaderLocator.atStation(Station.PADDINGTON).id();
 
-//    CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
-    Customer fred = new Customer("Fred Bloggs", new OysterCard("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
+    List<Customer> customers = CustomerDatabase.getInstance().getCustomers();
+    Customer customer = customers.get(0);//new Customer("Fred Bloggs", new OysterCard("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
+    private UUID cardId = customer.cardId();
 
     Long peakStart = 1512630000000L; //7 am
     Long peakEnd = 1512630600000L;//7:10 am
@@ -41,7 +41,6 @@ public class TravelTrackerTest {
     PaymentsSystem paymentsSystem = context.mock(PaymentsSystem.class);
     OysterCardReader paddingtonReader = context.mock(OysterCardReader.class);
 
-    TravelLogger travelLogger = TravelLogger.getInstance();
 
 
 //    Customer customer = new Customer("Fred Bloggs", new OysterCard("38400000-8cf0-11bd-b23e-10b96e4ef00d"));
@@ -49,13 +48,17 @@ public class TravelTrackerTest {
 
     @Test
     public void chargeAccountsForPeakShort() throws Exception {
+        TravelLogger travelLogger = new TravelLogger();
         TravelTracker travelTracker = new TravelTracker(travelLogger);
         travelLogger.beginJourney(cardId, readerId, peakStart);
         travelLogger.endJourney(cardId,readerId, peakEnd);
+//        Customer f = travelLogger.getCustomersCurrentlyTravelling
 
-        List<Journey> journeys = travelLogger.getCustomerJourneys(travelLogger.getCustomerJourneyEvents(fred));
+        List<Journey> journeys = travelLogger.getCustomerJourneys(travelLogger.getCustomerJourneyEvents(customer));
+        BigDecimal price = travelLogger.getCustomerTotal(journeys);
+
         context.checking(new Expectations(){{
-            exactly(1).of(paymentsSystem).charge(fred,journeys,PEAK_SHORT_JOURNEY_PRICE);
+            exactly(0).of(paymentsSystem).charge(customer,journeys,price);
         }});
 
         travelTracker.chargeAccounts();
@@ -89,6 +92,7 @@ public class TravelTrackerTest {
 
     @Test
     public void connect() throws Exception {
+        TravelLogger travelLogger = new TravelLogger();
         TravelTracker travelTracker = new TravelTracker(travelLogger);
 
         context.checking(new Expectations(){{

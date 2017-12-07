@@ -18,11 +18,6 @@ public class TravelLogger {
     private final Set<UUID> currentlyTravelling = new HashSet<>();
     private static TravelLogger instance = new TravelLogger();
 
-    private TravelLogger(){}
-
-    public static TravelLogger getInstance(){
-        return instance;
-    }
 
     public void beginJourney(UUID cardId, UUID readerId, long time){
         currentlyTravelling.add(cardId);
