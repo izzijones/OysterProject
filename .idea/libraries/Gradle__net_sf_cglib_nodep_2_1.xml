@@ -1,6 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: net.sf:cglib-nodep:2.1">
-    <CLASSES />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/Could not find net.sf:cglib-nodep:2.1.&#10;Searched in the following locations:&#10;    https:/repo1.maven.org/maven2/net/sf/cglib-nodep/2.1/cglib-nodep-2.1.pom&#10;    https:/repo1.maven.org/maven2/net/sf/cglib-nodep/2.1/cglib-nodep-2.1.jar!/" />
+    </CLASSES>
     <JAVADOC />
     <SOURCES />
   </library>
