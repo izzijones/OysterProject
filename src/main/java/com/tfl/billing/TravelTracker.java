@@ -11,54 +11,29 @@ import java.util.*;
 public class TravelTracker implements ScanListener {
 
 
-    private TravelLogger travelLogger;
+    private TravelUtils travelUtils;
+    private PaymentsSystem paymentsSystem;
+    private CustomerDatabase customerDatabase;
+    private ChargeModel chargeModel;
 
-    public TravelTracker(TravelLogger travelLogger){
-        this.travelLogger = travelLogger;
+    public TravelTracker(TravelUtils travelUtils, PaymentsSystem paymentsSystem, CustomerDatabase customerDatabase, ChargeModel chargeModel){
+        this.travelUtils = travelUtils;
+        this.paymentsSystem = paymentsSystem;
+        this.customerDatabase = customerDatabase;
+        this.chargeModel = chargeModel;
     }
 
-    public void chargeAccounts(PaymentsSystem paymentsSystem) {
-        CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
+    public void chargeAccounts() {
 
         List<Customer> customers = customerDatabase.getCustomers();
         for (Customer customer : customers) {
-            List<JourneyEvent> customerJourneyEvents = travelLogger.getCustomerJourneyEvents(customer);
-            List<Journey> customerJourneys = travelLogger.getCustomerJourneys(customerJourneyEvents);
-            BigDecimal customerTotal = travelLogger.getCustomerTotal(customerJourneys);
+            List<JourneyEvent> customerJourneyEvents = travelUtils.getCustomerJourneyEvents(customer);
+            List<Journey> customerJourneys = travelUtils.getCustomerJourneys(customerJourneyEvents);
+            BigDecimal customerTotal = chargeModel.computePrice(customerJourneys);
 
             paymentsSystem.charge(customer, customerJourneys, customerTotal);
         }
     }
-
-    private void totalJourneysFor(Customer customer) {
-        List<JourneyEvent> customerJourneyEvents = travelLogger.getCustomerJourneyEvents(customer);
-        List<Journey> customerJourneys = travelLogger.getCustomerJourneys(customerJourneyEvents);
-        BigDecimal customerTotal = travelLogger.getCustomerTotal(customerJourneys);
-
-        PaymentsSystem.getInstance().charge(customer, customerJourneys, customerTotal);
-    }
-
-
-
-
-
-
-
-    private boolean peak(Journey journey) {
-        return peak(journey.startTime()) || peak(journey.endTime());
-    }
-
-    private boolean peak(Date time) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(time);
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        return (hour >= 6 && hour <= 9) || (hour >= 17 && hour <= 19);
-    }
-
-    private boolean isLong(Journey journey){
-        return (journey.durationSeconds() >= (25 * 60));
-    }
-
 
     public void connect(OysterCardReader... cardReaders) {
         for (OysterCardReader cardReader : cardReaders) {
@@ -68,12 +43,12 @@ public class TravelTracker implements ScanListener {
 
     @Override
     public void cardScanned(UUID cardId, UUID readerId) {
-        if (!travelLogger.isTraveling(cardId)) {
-            travelLogger.endJourney(cardId,readerId, System.currentTimeMillis());
+        if (travelUtils.isTraveling(cardId)) {
+            travelUtils.endJourney(cardId,readerId, System.currentTimeMillis());
             System.out.println("Journey ended for " + cardId.toString());
         } else {
             if (CustomerDatabase.getInstance().isRegisteredId(cardId)) {
-                travelLogger.beginJourney(cardId,readerId, System.currentTimeMillis());
+                travelUtils.beginJourney(cardId,readerId, System.currentTimeMillis());
                 System.out.println("Journey started for "+ cardId.toString());
             } else {
                 throw new UnknownOysterCardException(cardId);

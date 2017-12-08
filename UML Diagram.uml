@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.tfl.billing.TravelTracker</OriginalElement>
+  <nodes>
+    <node x="-354.0" y="276.0">com.tfl.billing.JourneyStart</node>
+    <node x="0.0" y="101.0">com.tfl.billing.TravelTracker</node>
+    <node x="0.0" y="305.0">com.tfl.billing.Journey</node>
+    <node x="-191.0" y="276.0">com.tfl.billing.JourneyEnd</node>
+    <node x="287.44292992048395" y="391.0">com.tfl.billing.TravelUtils</node>
+    <node x="370.5829638833766" y="254.442929920484">com.tfl.billing.UnknownOysterCardException</node>
+    <node x="-378.0" y="426.0">com.tfl.billing.OysterCardChargeModel</node>
+    <node x="-359.0" y="332.0">com.tfl.billing.ChargeModel</node>
+    <node x="20.0" y="1.0">com.oyster.ScanListener</node>
+    <node x="-296.0" y="-3.0">com.tfl.billing.JourneyEvent</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.tfl.billing.JourneyEnd" target="com.tfl.billing.JourneyEvent">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.tfl.billing.JourneyStart" target="com.tfl.billing.JourneyEvent">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.tfl.billing.OysterCardChargeModel" target="com.tfl.billing.ChargeModel">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="com.tfl.billing.TravelTracker" target="com.oyster.ScanListener">
+      <point x="0.0" y="-92.0" />
+      <point x="0.0" y="25.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.4623503498840651" x="40.05961729645742" y="370.79386390002924" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
