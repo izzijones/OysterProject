@@ -40,7 +40,7 @@ public class TravelTrackerTest {
     PaymentsSystem paymentsSystemMock = context.mock(PaymentsSystem.class);
     OysterCardReader paddingtonReader = context.mock(OysterCardReader.class);
     TravelUtils travelUtilsMock = context.mock(TravelUtils.class);
-    ChargeModel chargeModel = new OysterCardChargeModel();
+
     TravelUtils travelUtils = new TravelUtils();
     PaymentsSystem paymentsSystem = PaymentsSystem.getInstance();
     CustomerDatabase customerDatabase = CustomerDatabase.getInstance();
@@ -158,7 +158,6 @@ public class TravelTrackerTest {
 
     @Test
     public void connect() throws Exception {
-        TravelUtils travelUtils = new TravelUtils();
         TravelTracker travelTracker = new TravelTracker(travelUtils, paymentsSystem, customerDatabase, new OysterCardChargeModel());
 
         context.checking(new Expectations(){{
